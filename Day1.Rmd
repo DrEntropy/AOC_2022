@@ -27,19 +27,15 @@ top_three |> summarise(sum(total))
 ```{r}
 top_three <- c(0,0,0)
 current <- 0
-
-for(calorie in data$calories)
-{
-  if(is.na(calorie))
-  {
-    replace <- last(which(top_three - current <0))
-    if(!is.na(replace))
-      top_three[replace] <- current
+ 
+for(calorie in data$calories) {
+  if(is.na(calorie)) {
+    top_three <- tail(sort(c(top_three,current)),-1)
     current <- 0
-  
+  } else {
+    current <- current + calorie
   }
-  current <- current + calorie
 }
-top_three
+sum(top_three)
 ```
 
