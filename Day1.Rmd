@@ -22,3 +22,24 @@ top_three
 top_three |> summarise(sum(total))
 ```
 
+## Must un-r solution
+
+```{r}
+top_three <- c(0,0,0)
+current <- 0
+
+for(calorie in data$calories)
+{
+  if(is.na(calorie))
+  {
+    replace <- last(which(top_three - current <0))
+    if(!is.na(replace))
+      top_three[replace] <- current
+    current <- 0
+  
+  }
+  current <- current + calorie
+}
+top_three
+```
+
