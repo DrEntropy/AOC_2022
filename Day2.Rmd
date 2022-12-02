@@ -14,13 +14,12 @@ data <- data |>
   transform(opponent = c('A'=1,'B'=2,'C'=3)[opponent], response =  c('X'=1,'Y'=2,'Z'=3)[response])
 ```
 
+
 ```{r}
 score_game <- \(opp, me)
 {
-  diff <- me - opp
-  (diff == 1 | diff == -2) * (me + 6) +
-    (diff == 0) * (me + 3) +
-    (diff == 2 | diff == -1) * me
+  diff <- (me - opp) %% 3 + 1
+  c(3,6,0)[diff] + me
 }
 
 data |>
@@ -38,7 +37,7 @@ The Elf finishes helping with the tent and sneaks back over to you. "Anyway, the
 ```{r}
 score_game_2 <- \(opp, res)
 {
-  my_move <- case_when(res == 1 ~ opp-1, res == 2 ~ opp, res == 3 ~ opp + 1)
+  my_move <-  opp + res - 2 
   move_score <- (my_move - 1) %% 3 + 1   
   win_score <- c(0,3,6)[res]
   move_score+win_score
