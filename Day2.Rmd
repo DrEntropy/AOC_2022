@@ -9,7 +9,7 @@ What would your total score be if everything goes exactly according to your stra
 
 ```{r}
 library(tidyverse)
-data <- read_delim('data/day2_input.txt',col_names=c('opponent','response'), delim=" ")
+data <- read_table('data/day2_input.txt',col_names=c('opponent','response'))
 data <- data |> 
   transform(opponent = c('A'=1,'B'=2,'C'=3)[opponent], response =  c('X'=1,'Y'=2,'Z'=3)[response])
 ```
