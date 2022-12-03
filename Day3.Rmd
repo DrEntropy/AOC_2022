@@ -50,7 +50,7 @@ Find the item type that corresponds to the badges of each three-Elf group. What 
 data |> 
   mutate(group_num = (row_number() + 2) %/% 3) |>
   group_by(group_num) |>
-  summarize(badge = intersect(intersect(items[[1]], items[[2]]), items[[3]])) |>
+  summarize(badge = items |> accumulate(intersect) |> last()) |>
   mutate(badge_val = match(badge, all_letters) ) |> 
   summarize(total_group_val = sum(badge_val))
 ```
