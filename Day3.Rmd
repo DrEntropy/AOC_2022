@@ -12,9 +12,47 @@ Find the item type that appears in both compartments of each rucksack. What is t
 
 ```{r}
 library(tidyverse)
-data <- read_table('data/day3_input.txt',col_names=c('rucksack'))
-#data <- data |> 
- # transform(opponent = c('A'=1,'B'=2,'C'=3)[opponent], response =  c('X'=1,'Y'=2,'Z'=3)[response])
+
+data <- read_table('data/day3_input.txt', col_names=c('rucksack')) |>
+   mutate(
+     items = strsplit(rucksack, ""),
+   ) 
+```
+
+
+
+Find intersection letter and score:
+
+```{r}
+all_letters <- c(letters, LETTERS)
+
+data |>
+  mutate(
+    dup = map_chr(items, \(list){
+      part_a <- list[1:length(list)/2]
+      part_b <- list[-(1:length(list)/2)]
+      intersect(part_a, part_b)
+      }),
+    value = match(dup,all_letters)
+  ) |> summarize(total = sum(value))
+
+```
+
+## Part 2
+
+Every set of three lines in your list corresponds to a single group, but each group can have a different badge item type.
+
+THe badge item is the one common to all three members in the group.
+
+Find the item type that corresponds to the badges of each three-Elf group. What is the sum of the priorities of those item types?
+
+```{r}
+data |> 
+  mutate(group_num = (row_number() + 2) %/% 3) |>
+  group_by(group_num) |>
+  summarize(badge = intersect(intersect(items[[1]], items[[2]]), items[[3]])) |>
+  mutate(badge_val = match(badge, all_letters) ) |> 
+  summarize(total_group_val = sum(badge_val))
 ```
 
  
