@@ -1,0 +1,73 @@
+
+
+--- Day 4: Camp Cleanup ---
+
+
+Space needs to be cleared before the last supplies can be unloaded from the ships, and so several Elves have been assigned the job of cleaning up sections of the camp. Every section has a unique ID number, and each Elf is assigned a range of section IDs.
+
+However, as some of the Elves compare their section assignments with each other, they've noticed that many of the assignments overlap. To try to quickly find overlaps and reduce duplicated effort, the Elves pair up and make a big list of the section assignments for each pair (your puzzle input).
+
+
+```{r}
+library(tidyverse)
+
+data <- read_csv('data/day4_input.txt', col_names=c('elf1','elf2')) 
+```
+
+## Part 1
+
+In how many assignment pairs does one range fully contain the other?
+
+
+
+```{r}
+
+strpairs_to_vec <- \(pair)
+{
+   strsplit(pair,'-') |> unlist() |> as.double()
+}
+
+# Determine if the first pair is fully inside the other pairs range  
+pair_encloses_pair <- \(pair1, pair2)
+{
+  pair1 <- strpairs_to_vec(pair1)
+  pair2 <- strpairs_to_vec(pair2)
+  (pair1[1] <= pair2[1] && pair1[2] >= pair2[2]) ||
+  (pair2[1] <= pair1[1] && pair2[2] >= pair1[2])  
+}
+
+
+data |> 
+  mutate(
+    enclosed = map2_lgl(elf1, elf2,  pair_encloses_pair)
+  ) |> summarize(sum(enclosed))
+
+```
+ 
+## Part 2
+
+It seems like there is still quite a bit of duplicate work planned. Instead, the Elves would like to know the number of pairs that overlap at all.
+
+
+ 
+```{r}
+pair_overlaps_pair <- \(pair1, pair2)
+{
+  pair1_v <- strpairs_to_vec(pair1)
+  pair2_v <- strpairs_to_vec(pair2)
+  (pair1_v[1] >= pair2_v[1] && pair1_v[1] <= pair2_v[2] )  ||
+     (pair1_v[2] >= pair2_v[1] && pair1_v[2] <= pair2_v[2] ) ||
+  pair_encloses_pair(pair1, pair2)
+}
+
+
+data |> 
+  mutate(
+    overlaps = map2_lgl(elf1, elf2, pair_overlaps_pair )
+  ) |> summarize(sum(overlaps))
+```
+ 
+ 
+ 
+  
+  
