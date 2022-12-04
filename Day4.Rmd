@@ -10,64 +10,48 @@ However, as some of the Elves compare their section assignments with each other,
 
 ```{r}
 library(tidyverse)
-
-data <- read_csv('data/day4_input.txt', col_names=c('elf1','elf2')) 
 ```
 
 ## Part 1
 
 In how many assignment pairs does one range fully contain the other?
 
-
-
-```{r}
-
-strpairs_to_vec <- \(pair)
-{
-   strsplit(pair,'-') |> unlist() |> as.double()
-}
-
-# Determine if the first pair is fully inside the other pairs range  
-pair_encloses_pair <- \(pair1, pair2)
-{
-  pair1 <- strpairs_to_vec(pair1)
-  pair2 <- strpairs_to_vec(pair2)
-  (pair1[1] <= pair2[1] && pair1[2] >= pair2[2]) ||
-  (pair2[1] <= pair1[1] && pair2[2] >= pair1[2])  
-}
-
-
-data |> 
-  mutate(
-    enclosed = map2_lgl(elf1, elf2,  pair_encloses_pair)
-  ) |> summarize(sum(enclosed))
-
-```
+ 
+ 
  
 ## Part 2
 
 It seems like there is still quite a bit of duplicate work planned. Instead, the Elves would like to know the number of pairs that overlap at all.
 
+# Solution
 
+## Part 1
  
 ```{r}
-pair_overlaps_pair <- \(pair1, pair2)
-{
-  pair1_v <- strpairs_to_vec(pair1)
-  pair2_v <- strpairs_to_vec(pair2)
-  (pair1_v[1] >= pair2_v[1] && pair1_v[1] <= pair2_v[2] )  ||
-     (pair1_v[2] >= pair2_v[1] && pair1_v[2] <= pair2_v[2] ) ||
-  pair_encloses_pair(pair1, pair2)
-}
+day4_data <- read_file("data/day4_input.txt")
+day4_data <- gsub("-", ",", day4_data)
+data <- read_csv(day4_data, col_names=c('elf1_l','elf1_u','elf2_l','elf2_u')) 
 
 
+data <- data |> 
+  mutate(
+    enclosed = (elf1_l <= elf2_l & elf1_u >= elf2_u) |
+               (elf2_l <= elf1_l & elf2_u >= elf1_u) 
+  )
+
+data |> summarize(sum(enclosed))
+
+```
+ 
+ ## Part 2
+ 
+```{r}
 data |> 
   mutate(
-    overlaps = map2_lgl(elf1, elf2, pair_overlaps_pair )
-  ) |> summarize(sum(overlaps))
+    overlap = enclosed | (elf1_l >= elf2_l & elf1_l <= elf2_u) |
+               (elf1_u >= elf2_l & elf1_u <= elf2_u) 
+  ) |>
+  summarize(sum(overlap))
 ```
  
  
- 
-  
-  
