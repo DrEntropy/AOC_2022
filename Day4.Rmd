@@ -48,8 +48,7 @@ data |> summarize(sum(enclosed))
 ```{r}
 data |> 
   mutate(
-    overlap = enclosed | (elf1_l >= elf2_l & elf1_l <= elf2_u) |
-               (elf1_u >= elf2_l & elf1_u <= elf2_u) 
+    overlap = elf1_l <= elf2_u & elf1_u >= elf2_l  
   ) |>
   summarize(sum(overlap))
 ```
