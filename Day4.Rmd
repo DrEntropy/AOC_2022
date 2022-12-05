@@ -1,5 +1,4 @@
 
-
 --- Day 4: Camp Cleanup ---
 
 
@@ -28,9 +27,21 @@ It seems like there is still quite a bit of duplicate work planned. Instead, the
 ## Part 1
  
 ```{r}
-day4_data <- read_file("data/day4_input.txt")
-day4_data <- gsub("-", ",", day4_data)
-data <- read_csv(day4_data, col_names=c('elf1_l','elf1_u','elf2_l','elf2_u')) 
+
+
+# This illustrates a fairly general way to read in a text file with 
+# wierd formatting
+
+data <- tibble(lines = read_lines('data/day4_input.txt')) |>
+        extract(lines, c('elf1_l','elf1_u','elf2_l','elf2_u'),
+                "^(\\d+)-(\\d+),(\\d+)-(\\d+)", convert=TRUE )  
+
+# Another way
+
+#day4_data <- read_file("data/day4_input.txt")
+#day4_data <- gsub("-", ",", day4_data)
+#data <- read_csv(day4_data, col_names=c('elf1_l','elf1_u','elf2_l','elf2_u')) 
+
 
 
 data <- data |> 
