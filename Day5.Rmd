@@ -1,0 +1,13 @@
+```{r}
+library(tidyverse)
+```
+ 
+ 
+```{r}
+data <- tibble(lines = read_lines('data/day5_input.txt')) |>
+        extract(lines, c('elf1_l','elf1_u','elf2_l','elf2_u'),
+                "^(\\d+)-(\\d+),(\\d+)-(\\d+)", convert=TRUE )  
+ 
+```
+ 
+ 
