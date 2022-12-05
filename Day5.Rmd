@@ -48,16 +48,20 @@ move_items <- \(num_items, start_stack, end_stack, reverse = TRUE)
     items <- rev(items)
   item_stacks[[end_stack]] <<- c(items, item_stacks[[end_stack]])
 }
+
+follow_orders <- \(reverse = TRUE)
+{
+ for(i in 1:nrow(moves))
+ {
+   move_items(moves[i, 1], moves[i, 2], moves[i, 3], reverse)
+ } 
+}
 ```
 
 # part 1
 
 ```{r}
-for(i in 1:nrow(moves))
-{
-   move_items(moves[i, 1], moves[i, 2], moves[i, 3])
-}
-
+follow_orders()
 paste0(sapply(item_stacks, \(x){x[[1]]}),collapse="")
 ```
 
@@ -65,13 +69,7 @@ paste0(sapply(item_stacks, \(x){x[[1]]}),collapse="")
 ## Part 2
 ```{r}
 item_stacks <- item_stacks_original
-
-#nrow(moves)
-for(i in 1:nrow(moves))
-{
-   move_items(moves[i, 1], moves[i, 2], moves[i, 3], FALSE)
-}
-
+follow_orders(FALSE)
 paste0(sapply(item_stacks, \(x){x[[1]]}), collapse="")
 ```
  
