@@ -4,74 +4,26 @@ library(tidyverse)
  
 
 ## Import and process data
-
  
 
-TODO: Don't hard-wire the number of stacks, and simplify!
-
 ```{r}
-raw_data <-  read_lines('data/day5_input.txt')
-# Empty line separates the stack from  the moves
-split_data <- split(raw_data, cumsum(str_length(raw_data) == 0))
-item_stacks_raw <- head(split_data[[1]], -1) # remove line of stack numbers
-orders <- split_data[[2]][-1]   #remove the blank
+raw_data <-  read_lines('data/day6_input.txt')
+stream <- str_split(raw_data,"")[[1]]
 
-num_stacks <- 9
-pattern <- str_c("^",paste0(rep("(\\[[A-Z]\\]|   )", num_stacks),collapse=" "))
-item_stacks_raw <- str_match(item_stacks_raw, pattern)[,-1]
-```
-
-
-## Prep stack and moves
-
-```{r}
-item_stacks <- list()
-for(i in 1:num_stacks)
-{
-  this_stack <- item_stacks_raw[,i]
-  this_stack <- this_stack[this_stack != "   "]
-  item_stacks[[i]] <- this_stack |> map_chr(~ str_sub(.,2,2))  
+detect_start <- \(data, marker_length){
+  for(i in 1:(length(data)-(marker_length-1))) {
+    if(length(unique(data[i:(i+marker_length-1)]))==marker_length)
+        break
+  }
+  i+marker_length-1
 }
-
-item_stacks_original <- item_stacks
-  
-moves <- str_match(orders, "move ([0-9]+) from ([0-9]+) to ([0-9]+)")[,-1]
-moves <- matrix(as.numeric(moves), ncol = ncol(moves))  # There must be abetter way?
-
-
-move_items <- \(num_items, start_stack, end_stack, reverse = TRUE)
-{
-  
-  items <- item_stacks[[start_stack]][1:num_items] 
-  item_stacks[[start_stack]] <<- item_stacks[[start_stack]][-(1:num_items)]
-  if(reverse)
-    items <- rev(items)
-  item_stacks[[end_stack]] <<- c(items, item_stacks[[end_stack]])
-}
-
-follow_orders <- \(reverse = TRUE)
-{
- for(i in 1:nrow(moves))
- {
-   move_items(moves[i, 1], moves[i, 2], moves[i, 3], reverse)
- } 
-}
-```
 
 # part 1
+print(detect_start(stream, 4))
+# part 2
+print(detect_start(stream, 14))
 
-```{r}
-follow_orders()
-paste0(sapply(item_stacks, \(x){x[[1]]}),collapse="")
 ```
-
-
-## Part 2
-```{r}
-item_stacks <- item_stacks_original
-follow_orders(FALSE)
-paste0(sapply(item_stacks, \(x){x[[1]]}), collapse="")
-```
- 
- Answers: Part1: QNNTGTPFN Part 2: GGNPJBTTR
+ 1544
+ 2145
  
