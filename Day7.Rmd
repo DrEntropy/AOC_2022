@@ -79,7 +79,7 @@ add_file <- \(cd, file) {
   size <- as.numeric(file[1])
   cd$file_sizes <- c(cd$file_sizes, size)
   cd$file_names <- c(cd$file_names, file[[2]])
-  # now add file and every to every parent
+  # now add file size recursively
   add_size(cd, size)
   return(cd)
 }
