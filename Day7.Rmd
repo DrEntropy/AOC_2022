@@ -1,0 +1,49 @@
+```{r}
+library(tidyverse)
+```
+ 
+
+## Import and process data
+ 
+
+```{r}
+raw_data <-  read_lines('data/day7_input.txt')
+```
+
+Each line has three possible types:
+$ -> A command
+<numbers> -> A file size
+dir <identifier> -> A subdirectory in a listing
+
+The commands are 
+cd /
+cd <identifier>
+cd ..
+ls
+
+
+```{r}
+# Directories are lists of name, sub_dirs, contents.  
+
+process_cd  <- \(cd, dir, new_dir){
+  new_dir <- trimws(new_dir)
+  
+}
+
+```
+```{r}
+directory <- list(name = 'root', sub_dirs = NULL, contents = NULL)
+curr_dir <- 'root'
+for(line in raw_data){
+  if(substr(line,1,4)=='$ cd') {
+    curr_dir <- process_cd(curr_dir, directory, substr(line,6,nchar(line)))
+  } else if(substr(line,1,2)=='$ ls') {
+    directory <- process_ls(curr_dir, directory)
+  } else {
+    print("parse error!")
+    break
+  }
+    
+}
+```
+
