@@ -44,15 +44,30 @@ process_cd  <- \(cd, new_dir){
   }
 }
 
+gen_dir_name <- \(cd){
+  name <- cd$name
+  current <- cd
+  while(! is_empty(env_parent(current))){
+    current <- env_parent(current)
+    name <- str_c(current$name,"/",name)
+  }
+  return(name)
+}
+
+
 add_sub <- \(cd, dir) {
- cd$sub_dirs <- c(cd$sub_dirs, env(cd, name= dir, sub_dirs = NULL,
-                                   file_sizes = NULL, file_names = NULL))
- list_of_dirs[[dir]] = 0
+ new_sub_dir <- env(cd, name= dir, sub_dirs = NULL,
+                                   file_sizes = NULL, file_names = NULL)
+ cd$sub_dirs <- c(cd$sub_dirs, new_sub_dir)
+ list_of_dirs[[gen_dir_name(new_sub_dir)]] = 0
  return(cd)
 }
 
+
+
 add_size <-  \(cd, size){
-  list_of_dirs[[cd$name]] = list_of_dirs[[cd$name]] + size
+  dir_name <- gen_dir_name(cd)
+  list_of_dirs[[dir_name]] = list_of_dirs[[dir_name]] + size
   if(is_empty(env_parent(cd))){
     return()
   }
@@ -95,6 +110,8 @@ for(line in raw_data){
 ```{r}
 v_of_dirs <- as_vector(as.list(list_of_dirs))
 sum(v_of_dirs[v_of_dirs <= 100000])
+
+#> 1749646
 ```
 1353138
 1478292
