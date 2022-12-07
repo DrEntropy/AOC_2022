@@ -105,7 +105,9 @@ for(line in raw_data){
 
  
 
-## Find all of the directories with a total size of at most 100000. What is the sum of the total sizes of those directories?
+## Part 1
+
+Find all of the directories with a total size of at most 100000. What is the sum of the total sizes of those directories?
 
 ```{r}
 v_of_dirs <- as_vector(as.list(list_of_dirs))
@@ -113,5 +115,14 @@ sum(v_of_dirs[v_of_dirs <= 100000])
 
 #> 1749646
 ```
-1353138
-1478292
+
+## Part 2
+
+find smallest directory that will free up 30000000
+
+```{r}
+current_free_space = 70000000 - v_of_dirs['root']
+min(v_of_dirs[v_of_dirs > (30000000 - current_free_space)])
+```
+
+Answer : 1498966
