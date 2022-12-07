@@ -1,5 +1,6 @@
 ```{r}
 library(tidyverse)
+library(rlang)
 ```
  
 
@@ -23,32 +24,37 @@ ls
 
 
 ```{r}
-# Directories are lists of name, sub_dirs, contents.  
+# Directories are environments (so can be modified) of name, sub_dirs, contents.  
+directory <- env(empty_env(), name = 'root', sub_dirs = NULL,  contents = NULL)
+curr_dir <- directory
 
-process_cd  <- \(cd, dir, new_dir){
+process_cd  <- \(cd, new_dir){
   new_dir <- trimws(new_dir)
   if(new_dir == '/'){
-    return(new_dir)
+    return(directory)
   } else if(new_dir == '..'){
-    return(head(cd, -1))  # Needs error checking
+    return(env_parent(cur_dir)) # will cause error if cd on root
   } else {
-    return(c(cd, new_dir)) 
+    # As far as i can tell this is never called before ls reveals name
+    
   }
 }
 
 process_ls <- \(cd, dir) {
-  # somehow walk down into the structure and modify it
+  # somehow walk down into the structure and modify it. This seems really painful in R without references.
 }
 
 ```
+
+
 ```{r}
-directory <- list(name = 'root', sub_dirs = NULL, contents = NULL)
-curr_dir <- '/'
+
+
 for(line in raw_data){
   if(substr(line,1,4)=='$ cd') {
-    curr_dir <- process_cd(curr_dir, directory, substr(line,6,nchar(line)))
+    curr_dir <- process_cd(curr_dir, substr(line,6,nchar(line)))
   } else if(substr(line,1,2)=='$ ls') {
-    directory <- process_ls(curr_dir, directory)
+    curr_dir <- process_ls(curr_dir)
   } else {
     print("parse error!")
     break
