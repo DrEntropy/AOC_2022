@@ -27,13 +27,23 @@ ls
 
 process_cd  <- \(cd, dir, new_dir){
   new_dir <- trimws(new_dir)
-  
+  if(new_dir == '/'){
+    return(new_dir)
+  } else if(new_dir == '..'){
+    return(head(cd, -1))  # Needs error checking
+  } else {
+    return(c(cd, new_dir)) 
+  }
+}
+
+process_ls <- \(cd, dir) {
+  # somehow walk down into the structure and modify it
 }
 
 ```
 ```{r}
 directory <- list(name = 'root', sub_dirs = NULL, contents = NULL)
-curr_dir <- 'root'
+curr_dir <- '/'
 for(line in raw_data){
   if(substr(line,1,4)=='$ cd') {
     curr_dir <- process_cd(curr_dir, directory, substr(line,6,nchar(line)))
