@@ -25,41 +25,76 @@ ls
 
 ```{r}
 # Directories are environments (so can be modified) of name, sub_dirs, contents.  
-directory <- env(empty_env(), name = 'root', sub_dirs = NULL,  contents = NULL)
+directory <- env(empty_env(), name = 'root', sub_dirs = NULL, 
+                 file_sizes = NULL, file_names= NULL)
 curr_dir <- directory
+
+list_of_dirs <- env(empty_env(), root = 0)
 
 process_cd  <- \(cd, new_dir){
   new_dir <- trimws(new_dir)
   if(new_dir == '/'){
     return(directory)
   } else if(new_dir == '..'){
-    return(env_parent(cur_dir)) # will cause error if cd on root
+    return(env_parent(cd)) # will cause error if cd on root
   } else {
     # As far as i can tell this is never called before ls reveals name
-    
+    locate <- sapply(cd$sub_dirs, \(x){x$name == new_dir})
+    return(cd$sub_dirs[locate][[1]])
   }
 }
 
-process_ls <- \(cd, dir) {
-  # somehow walk down into the structure and modify it. This seems really painful in R without references.
+add_sub <- \(cd, dir) {
+ cd$sub_dirs <- c(cd$sub_dirs, env(cd, name= dir, sub_dirs = NULL,
+                                   file_sizes = NULL, file_names = NULL))
+ list_of_dirs[[dir]] = 0
+ return(cd)
 }
 
-```
+add_size <-  \(cd, size){
+  list_of_dirs[[cd$name]] = list_of_dirs[[cd$name]] + size
+  if(is_empty(env_parent(cd))){
+    return()
+  }
+  add_size(env_parent(cd), size)
+}
+
+add_file <- \(cd, file) {
+  file <- str_split(file, " ", simplify= TRUE)
+  size <- as.numeric(file[1])
+  cd$file_sizes <- c(cd$file_sizes, size)
+  cd$file_names <- c(cd$file_names, file[[2]])
+  # now add file and every to every parent
+  add_size(cd, size)
+  return(cd)
+}
 
 
-```{r}
+
+## Build data structure and accumulate direcotry sizes
 
 
 for(line in raw_data){
-  if(substr(line,1,4)=='$ cd') {
+  if(substr(line,1,4) == '$ cd') {
     curr_dir <- process_cd(curr_dir, substr(line,6,nchar(line)))
-  } else if(substr(line,1,2)=='$ ls') {
-    curr_dir <- process_ls(curr_dir)
+  } else if(substr(line,1,4) == '$ ls') {
+    # nothing to do 
+  } else if(substr(line,1,3) == 'dir') {
+    curr_dir <- add_sub(curr_dir, substr(line,5,nchar(line)))
   } else {
-    print("parse error!")
-    break
+    # Must be a file now
+    curr_dir <- add_file(curr_dir, line)
   }
-    
 }
 ```
 
+ 
+
+## Find all of the directories with a total size of at most 100000. What is the sum of the total sizes of those directories?
+
+```{r}
+v_of_dirs <- as_vector(as.list(list_of_dirs))
+sum(v_of_dirs[v_of_dirs <= 100000])
+```
+1353138
+1478292
