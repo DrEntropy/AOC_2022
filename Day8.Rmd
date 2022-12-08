@@ -1,0 +1,15 @@
+```{r}
+library(tidyverse)
+library(rlang)
+```
+ 
+
+## Import and process data
+ 
+
+```{r}
+raw_data <-  read_lines('data/day8_input.txt')
+matrix <-  t(unname(sapply(raw_data,
+       \(x){as.numeric(str_split(x,"",simplify=TRUE))})))
+```
+ 
