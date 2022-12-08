@@ -13,4 +13,55 @@ matrix <-  str_split(raw_data,"",simplify=TRUE) |>
            as.numeric()  |>
            matrix(nrow = length(raw_data))
 ```
+
+## Part 1
+
+```{r}
+res = matrix(FALSE, ncol= ncol(matrix), nrow = nrow(matrix))
+visible <- \(mat, i, j){
+  here <- mat[i,j]
+  if(i==1 || j == 1 || i == nrow(mat) || j == ncol(mat))
+    return(TRUE)
+  right <- here > max(mat[i,(j+1):ncol(mat)]) 
+  left <- here > max(mat[i,1:(j-1)])
+  up <- here > max(mat[1:(i-1),j])
+  down <- here > max(mat[(i+1):nrow(mat),j])
+  return(right || left || up || down)
+}
+
+for(i in 1:nrow(matrix))
+  for(j in 1:ncol(matrix))
+    res[i,j] = visible(matrix,i,j)
+
+sum(res)
+```
+
+## Part 2
  
+ 
+```{r}
+score = matrix(0, ncol= ncol(matrix), nrow = nrow(matrix))
+
+first_false <- \(vec){
+  if(prod(vec) == 1)
+    return(length(vec))
+  return(sum(cumprod(vec))+1)
+}
+
+score_tree <- \(mat, i, j){
+  here <- mat[i,j]
+  if(i==1 || j == 1 || i == nrow(mat) || j == ncol(mat))
+    return(0)
+  right <- first_false(mat[i,(j+1):ncol(mat)] < here)
+  left <- first_false(mat[i,(j-1):1] < here)
+  up <-  first_false(mat[(i-1):1,j] < here)
+  down <-  first_false(mat[(i+1):nrow(mat),j] < here)
+  return(right*left*up*down)
+}
+
+for(i in 1:nrow(matrix))
+  for(j in 1:ncol(matrix))
+    score[i,j] = score_tree(matrix,i,j)
+
+max(score)
+```
