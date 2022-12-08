@@ -9,7 +9,8 @@ library(rlang)
 
 ```{r}
 raw_data <-  read_lines('data/day8_input.txt')
-matrix <-  t(unname(sapply(raw_data,
-       \(x){as.numeric(str_split(x,"",simplify=TRUE))})))
+matrix <-  str_split(raw_data,"",simplify=TRUE) |>
+           as.numeric()  |>
+           matrix(nrow = length(raw_data))
 ```
  
