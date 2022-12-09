@@ -1,6 +1,4 @@
-```{r}
-library(tidyverse)
-```
+
  Assume the head and the tail both start at the same position, overlapping.
 
 If the head is ever two steps directly up, down, left, or right from the tail, the tail must also move one step in that direction so it remains close enough
@@ -14,9 +12,46 @@ Otherwise, if the head and tail aren't touching and aren't in the same row or co
  
 
 ```{r}
-raw_data <-  read_lines('data/day9_input.txt')
+library(tidyverse)
+moves <-  read_delim('data/day9_input.txt',delim = ' ', col_names = c('direction','distance'))
+
 ```
+
+```{r}
+moves$v_direction = map(moves$direction, \(d){
+                        switch(d,
+                                L = c(-1,0),
+                                R = c(1,0),
+                                U = c(0,1),
+                                D = c(0,-1))
+                       })
+
+expanded_moves = moves[rep(seq_len(dim(moves)[1]), moves$distance), 'v_direction']$v_direction
+leader_pos = accumulate(expanded_moves, `+`)
+```
+
 
 ## Part 1:
 
 Simulate your complete hypothetical series of motions. How many positions does the tail of the rope visit at least once?
+
+ 
+Ok, now given our position, and the leader position, the rules can be implemented:
+
+```{r}
+move_follower <- \(follower_pos, leader_pos){
+  rel_pos <- leader_pos - follower_pos
+  if(sum(rel_pos^2) <= 2)  # still close enough
+    return(follower_pos)
+  rel_pos <- leader_pos - follower_pos
+  return(follower_pos + sign(rel_pos)) 
+}
+
+follow_pos <- accumulate(leader_pos, move_follower, .init= c(0,0))
+length(unique(follow_pos))
+```
+
+5930
+
+
+
