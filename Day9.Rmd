@@ -43,7 +43,6 @@ move_follower <- \(follower_pos, leader_pos){
   rel_pos <- leader_pos - follower_pos
   if(sum(rel_pos^2) <= 2)  # still close enough
     return(follower_pos)
-  rel_pos <- leader_pos - follower_pos
   return(follower_pos + sign(rel_pos)) 
 }
 
@@ -53,5 +52,12 @@ length(unique(follow_pos))
 
 5930
 
+## Part 2
 
+```{r}
+follow_pos_n <- follow_pos
+for(i in 1:8) 
+  follow_pos_n <- accumulate(follow_pos_n, move_follower, .init= c(0,0))
+length(unique(follow_pos_n))  
+```
 
