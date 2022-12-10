@@ -4,14 +4,14 @@
 
 ```{r}
 library(tidyverse)
-prog <-  read_delim('data/day10_input.txt',delim = ' ', col_names = c('op','arg'))
+prog <-  read_delim('data/day10_input.txt',delim = ' ', col_names = c('op', 'arg'))
 prog$arg[is.na(prog$arg)] <- 0
 
 prog <- prog |> mutate(
                   steps = case_when(op == 'addx' ~ 2, op == 'noop' ~ 1),
-                  step_num_start= tail(accumulate(steps, `+`, .init = 1),-1)-steps,
+                  step_num_start= tail(accumulate(steps, `+`, .init = 1), -1)-steps,
                   x_reg =  accumulate(arg, `+`), x_reg = x_reg + 1,
-                  x_reg_prev = c(1,head(x_reg,-1))
+                  x_reg_prev = c(1, head(x_reg,-1))
                )
 ```
  
@@ -22,15 +22,15 @@ Find the signal strength during the 20th, 60th, 100th, 140th, 180th, and 220th c
  
  
 ```{r}
-key_steps = seq(20,240,40)
+key_steps = seq(20, 240, 40)
 
 # expand to by step and clean up. x_reg is value DURING step
 by_step <- prog |> uncount(steps) |> 
-                   mutate( step_num = seq(1,240)) |>
+                   mutate(step_num = seq(1, 240)) |>
                    select(step_num, x_reg_prev) |>
                    rename(x_reg = x_reg_prev) 
 
-measure_steps <- by_step[by_step$step_num %in% key_steps,]
+measure_steps <- by_step[by_step$step_num %in% key_steps, ]
 sum(measure_steps$step_num * measure_steps$x_reg)
  
 ```
@@ -44,7 +44,7 @@ sum(measure_steps$step_num * measure_steps$x_reg)
 message   <- by_step |> 
              mutate(x_pos = (step_num - 1) %% 40,   # beam position
                     pixel_on = abs(x_pos - x_reg) < 2,
-                    pixel = ifelse(pixel_on, "#","."),
+                    pixel = ifelse(pixel_on, "#", "."),
                     row_num = cumsum(x_pos == 0)
                     ) |>
              group_by(row_num) |>
