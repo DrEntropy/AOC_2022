@@ -1,13 +1,4 @@
-
- Assume the head and the tail both start at the same position, overlapping.
-
-If the head is ever two steps directly up, down, left, or right from the tail, the tail must also move one step in that direction so it remains close enough
-
-Otherwise, if the head and tail aren't touching and aren't in the same row or column, the tail always moves one step diagonally to keep up.
-
-
-
-
+ 
 ## Import and process data
  
 
@@ -33,11 +24,14 @@ Find the signal strength during the 20th, 60th, 100th, 140th, 180th, and 220th c
 ```{r}
 key_steps = seq(20,240,40)
 
+# expand to by step and clean up. x_reg is value DURING step
 by_step <- prog |> uncount(steps) |> 
-                   mutate( step_num = seq(1,240))
+                   mutate( step_num = seq(1,240)) |>
+                   select(step_num, x_reg_prev) |>
+                   rename(x_reg = x_reg_prev) 
 
 measure_steps <- by_step[by_step$step_num %in% key_steps,]
-sum(measure_steps$step_num * measure_steps$x_reg_prev)
+sum(measure_steps$step_num * measure_steps$x_reg)
  
 ```
 
@@ -46,9 +40,18 @@ sum(measure_steps$step_num * measure_steps$x_reg_prev)
 ## Part 2 
 
 ```{r}
-# clarify what is what
-by_step <- by_step |> select(step_num, x_reg_prev) |> rename(x_reg = x_reg_prev)
-
+ 
+message   <- by_step |> 
+             mutate(x_pos = (step_num - 1) %% 40,   # beam position
+                    pixel_on = abs(x_pos - x_reg) < 2,
+                    pixel = ifelse(pixel_on, "#","."),
+                    row_num = cumsum(x_pos == 0)
+                    ) |>
+             group_by(row_num) |>
+             summarize(row_string = str_flatten(pixel)) |>
+             summarize(final = str_flatten(row_string, collapse ="\n"))
+ 
+cat(message$final)
 ```
 
-
+EGLHBLFJ
