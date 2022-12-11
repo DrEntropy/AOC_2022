@@ -4,15 +4,74 @@
 First thought is to use rows like this:
 Money_num, current_items, operation, operand, test_divisor, true_target, false_target
 
-Then we just process these one at a time, updating the tibble with new current items after each item is processed. Or might be better to keep a seperate list of current items to avoid all the copying?
+Then we just process these one at a time, updating the tibble with new current items after each item is processed. Or might be better to keep a separate list of current items to avoid all the copying?
 
 
 ```{r}
 library(tidyverse)
-data <-  read_delim('data/day11_input.txt',delim = ' ', col_names = c('a', 'b'))
- 
+raw_data <-  read_file('data/day11_test_input.txt')
 ```
  
- 
+I assume there is a much better way!
+
+```{r}
+monkey_num <- as.numeric(str_match_all(raw_data,"Monkey (\\d+)")[[1]][,2])
+operation  <- str_match_all(raw_data,"Operation: new = old (.)")[[1]][,2]
+operand    <- str_match_all(raw_data,"Operation: new = old . (.+)")[[1]][,2]
+test_divisor <- as.numeric(str_match_all(raw_data,"Test: divisible by (\\d+)")[[1]][,2])
+true_target <- as.numeric(str_match_all(raw_data,"If true: throw to monkey (\\d+)")[[1]][,2])
+false_target <- as.numeric(str_match_all(raw_data,"If false: throw to monkey (\\d+)")[[1]][,2])
+items <- str_match_all(raw_data,"Starting items: ((\\d+, )*(\\d+))") [[1]][,2]
+items <- map(items, \(x){as.numeric(str_split(x,", ")[[1]])})
+```
+
+
 ## Part 1
+
+
+
+```{r}
+inspect_item <- \(monkey, item){
+  if(operand[[monkey]] == "old")
+      value <- item
+  else
+      value <- as.numeric(operand[[monkey]])
+  
+  if(operation[[monkey]] == "*")
+     return(item * value)
+  return(item + value)
+}
+
+```
+
+* Assumes (as in my data) that monkeys never throw to themselves
+
+```{r}
+num_rounds = 2
+monkey_inspections <- rep(0,length(monkey_num))
+for(round in 1:num_rounds){
+  for(monkey_index in seq_along(monkey_num)){
+    curr_items <- items[[monkey_index]]
+    monkey_inspections[[monkey_index]] <- monkey_inspections[[monkey_index]] + length(curr_items)
+    if(length(curr_items) > 1) {
+      for(i in seq_along(curr_items)){
+         final_worry <-  inspect_item(monkey_index, curr_items[[i]]) %/% 3
+         if(final_worry %% test_divisor[[monkey_index]] == 0){
+           target <- true_target[[monkey_index]] + 1
+         } else {
+           target <- false_target[[monkey_index]] + 1
+         }
+         items[[ target ]] <- c(items[[target]], final_worry)
+      }
+      items[[monkey_index]] <- double()  #empty 
+    }
+  }
+}
+    
+```
+
+```{r}
+prod(tail(sort(monkey_inspections),2))
+```
+109892 - too low
  
