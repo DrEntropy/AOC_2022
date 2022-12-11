@@ -1,46 +1,44 @@
  
 ## Import and process data
  
-First thought is to use rows like this:
-Money_num, current_items, operation, operand, test_divisor, true_target, false_target
-
-Then we just process these one at a time, updating the tibble with new current items after each item is processed. Or might be better to keep a separate list of current items to avoid all the copying?
-
 
 ```{r}
 library(tidyverse)
 raw_data <-  read_file('data/day11_input.txt')
 ```
  
-I assume there is a much better way!
+Build up the data tibble using regex
+
+
 
 ```{r}
-setup <- \(){
-  monkey_num <<- as.numeric(str_match_all(raw_data,"Monkey (\\d+)")[[1]][,2])
-  operation  <<- str_match_all(raw_data,"Operation: new = old (.)")[[1]][,2]
-  operand    <<- str_match_all(raw_data,"Operation: new = old . (.+)")[[1]][,2]
-  test_divisor <<- as.numeric(str_match_all(raw_data,"Test: divisible by (\\d+)")[[1]][,2])
-  true_target <<- as.numeric(str_match_all(raw_data,"If true: throw to monkey (\\d+)")[[1]][,2])
-  false_target <<- as.numeric(str_match_all(raw_data,"If false: throw to monkey (\\d+)")[[1]][,2])
-  items <<- str_match_all(raw_data,"Starting items: ((\\d+, )*(\\d+))") [[1]][,2]
-  items <<- map(items, \(x){as.numeric(str_split(x,", ")[[1]])})
-}
+monkey_data <- tibble(
+  monkey_num = as.numeric(str_match_all(raw_data,"Monkey (\\d+)")[[1]][,2]),
+  operation  = str_match_all(raw_data,"Operation: new = old (.)")[[1]][,2],
+  operand    = str_match_all(raw_data,"Operation: new = old . (.+)")[[1]][,2],
+  test_divisor = as.numeric(str_match_all(raw_data,"Test: divisible by (\\d+)")[[1]][,2]),
+  true_target = as.numeric(str_match_all(raw_data,"If true: throw to monkey (\\d+)")[[1]][,2]),
+  false_target = as.numeric(str_match_all(raw_data,"If false: throw to monkey (\\d+)")[[1]][,2]),
+  items = str_match_all(raw_data,"Starting items: ((\\d+, )*(\\d+))") [[1]][,2]
+)
 
+monkey_data$items <- map(monkey_data$items, \(x){as.numeric(str_split(x,", ")[[1]])})
+
+monkey_data_original <- monkey_data
 ```
 
 
-## Part 1
-
+## Processing.
 
 
 ```{r}
 inspect_item <- \(monkey, item){
-  if(operand[[monkey]] == "old")
+  if(monkey_data$operand[[monkey]] == "old")
       value <- item
   else
-      value <- as.numeric(operand[[monkey]])
+      value <- as.numeric(monkey_data$operand[[monkey]])
   
-  if(operation[[monkey]] == "*")
+  if(monkey_data$operation[[monkey]] == "*")
      return(item * value)
   return(item + value)
 }
@@ -49,31 +47,35 @@ inspect_item <- \(monkey, item){
 
 * Assumes (as in my data) that monkeys never throw to themselves
 
+
 ```{r}
 monkey_dance <- \(num_rounds, reducer){
-    setup()
-    monkey_inspections <- rep(0,length(monkey_num))
+    monkey_inspections <- rep(0,length(monkey_data$monkey_num))
     for(round in 1:num_rounds){
-      for(monkey_index in seq_along(monkey_num)){
-        curr_items <- items[[monkey_index]]
+      for(monkey_index in seq_along(monkey_data$monkey_num)){
+        curr_items <- monkey_data$items[[monkey_index]]
         monkey_inspections[[monkey_index]] <- monkey_inspections[[monkey_index]] + length(curr_items)
         if(length(curr_items) > 0) {
           for(i in seq_along(curr_items)){
              final_worry <-  reducer(inspect_item(monkey_index, curr_items[[i]])) 
-             if(final_worry %% test_divisor[[monkey_index]] == 0){
-               target <- true_target[[monkey_index]] + 1
+             if(final_worry %% monkey_data$test_divisor[[monkey_index]] == 0){
+               target <- monkey_data$true_target[[monkey_index]] + 1
              } else {
-               target <- false_target[[monkey_index]] + 1
+               target <- monkey_data$false_target[[monkey_index]] + 1
              }
-             items[[ target ]] <<- c(items[[target]], final_worry)
+             monkey_data$items[[ target ]] <<- c(monkey_data$items[[target]], final_worry)
           }
-          items[[monkey_index]] <<- double()  #empty 
+          monkey_data$items[[monkey_index]] <<- double()  #empty 
         }
       }
     }
-    prod(tail(sort(monkey_inspections),2)) 
+    prod(tail(sort(monkey_inspections),2))
 }
+```
 
+# Part 1
+
+```{r}
 monkey_dance(20, \(x){x %/% 3}) 
 ```
 
@@ -83,11 +85,11 @@ monkey_dance(20, \(x){x %/% 3})
 
 ## Part 2 
 
-NOTE : Need to set up to reload data arrays
 
 ```{r}
-mod_fact <- prod(test_divisor)
-monkey_dance(10000, \(x){x %% mod_fact}) 
+mod_fact <- prod(monkey_data$test_divisor)
+monkey_data <- monkey_data_original
+monkey_dance( 10000, \(x){x %% mod_fact}) 
 ```
 
  29703395016
