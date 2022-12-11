@@ -1,6 +1,11 @@
  
 ## Import and process data
  
+First thought is to use rows like this:
+Money_num, current_items, operation, operand, test_divisor, true_target, false_target
+
+Then we just process these one at a time, updating the tibble with new current items after each item is processed. Or might be better to keep a seperate list of current items to avoid all the copying?
+
 
 ```{r}
 library(tidyverse)
