@@ -1,0 +1,13 @@
+ 
+## Import and process data
+ 
+
+```{r}
+library(tidyverse)
+data <-  read_delim('data/day11_input.txt',delim = ' ', col_names = c('a', 'b'))
+ 
+```
+ 
+ 
+## Part 1
+ 
