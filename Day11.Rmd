@@ -82,6 +82,7 @@ NOTE : Need to set up to reload data arrays
 
 ```{r}
 num_rounds = 10000
+reducer = prod(test_divisor)
 monkey_inspections <- rep(0,length(monkey_num))
 for(round in 1:num_rounds){
   for(monkey_index in seq_along(monkey_num)){
@@ -89,7 +90,7 @@ for(round in 1:num_rounds){
     monkey_inspections[[monkey_index]] <- monkey_inspections[[monkey_index]] + length(curr_items)
     if(length(curr_items) > 0) {
       for(i in seq_along(curr_items)){
-         final_worry <-  inspect_item(monkey_index, curr_items[[i]]) %/% 3
+         final_worry <-  inspect_item(monkey_index, curr_items[[i]]) %% reducer
          if(final_worry %% test_divisor[[monkey_index]] == 0){
            target <- true_target[[monkey_index]] + 1
          } else {
@@ -102,6 +103,10 @@ for(round in 1:num_rounds){
   }
 }
 
+```
+
+```{r}
+prod(tail(sort(monkey_inspections),2))
 ```
 
 
