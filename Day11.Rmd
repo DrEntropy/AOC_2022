@@ -50,28 +50,31 @@ inspect_item <- \(monkey, item){
 * Assumes (as in my data) that monkeys never throw to themselves
 
 ```{r}
-setup()
-num_rounds = 20
-monkey_inspections <- rep(0,length(monkey_num))
-for(round in 1:num_rounds){
-  for(monkey_index in seq_along(monkey_num)){
-    curr_items <- items[[monkey_index]]
-    monkey_inspections[[monkey_index]] <- monkey_inspections[[monkey_index]] + length(curr_items)
-    if(length(curr_items) > 0) {
-      for(i in seq_along(curr_items)){
-         final_worry <-  inspect_item(monkey_index, curr_items[[i]]) %/% 3
-         if(final_worry %% test_divisor[[monkey_index]] == 0){
-           target <- true_target[[monkey_index]] + 1
-         } else {
-           target <- false_target[[monkey_index]] + 1
-         }
-         items[[ target ]] <- c(items[[target]], final_worry)
+monkey_dance <- \(num_rounds, reducer){
+    setup()
+    monkey_inspections <- rep(0,length(monkey_num))
+    for(round in 1:num_rounds){
+      for(monkey_index in seq_along(monkey_num)){
+        curr_items <- items[[monkey_index]]
+        monkey_inspections[[monkey_index]] <- monkey_inspections[[monkey_index]] + length(curr_items)
+        if(length(curr_items) > 0) {
+          for(i in seq_along(curr_items)){
+             final_worry <-  reducer(inspect_item(monkey_index, curr_items[[i]])) 
+             if(final_worry %% test_divisor[[monkey_index]] == 0){
+               target <- true_target[[monkey_index]] + 1
+             } else {
+               target <- false_target[[monkey_index]] + 1
+             }
+             items[[ target ]] <<- c(items[[target]], final_worry)
+          }
+          items[[monkey_index]] <<- double()  #empty 
+        }
       }
-      items[[monkey_index]] <- double()  #empty 
     }
-  }
+    prod(tail(sort(monkey_inspections),2)) 
 }
-prod(tail(sort(monkey_inspections),2))    
+
+monkey_dance(20, \(x){x %/% 3}) 
 ```
 
  
@@ -83,32 +86,11 @@ prod(tail(sort(monkey_inspections),2))
 NOTE : Need to set up to reload data arrays
 
 ```{r}
-setup()
-num_rounds = 10000
-reducer = prod(test_divisor)
-monkey_inspections <- rep(0,length(monkey_num))
-for(round in 1:num_rounds){
-  for(monkey_index in seq_along(monkey_num)){
-    curr_items <- items[[monkey_index]]
-    monkey_inspections[[monkey_index]] <- monkey_inspections[[monkey_index]] + length(curr_items)
-    if(length(curr_items) > 0) {
-      for(i in seq_along(curr_items)){
-         final_worry <-  inspect_item(monkey_index, curr_items[[i]]) %% reducer
-         if(final_worry %% test_divisor[[monkey_index]] == 0){
-           target <- true_target[[monkey_index]] + 1
-         } else {
-           target <- false_target[[monkey_index]] + 1
-         }
-         items[[ target ]] <- c(items[[target]], final_worry)
-      }
-      items[[monkey_index]] <- double()  #empty 
-    }
-  }
-}
-prod(tail(sort(monkey_inspections),2))
+mod_fact <- prod(test_divisor)
+monkey_dance(10000, \(x){x %% mod_fact}) 
 ```
 
- 
+ 29703395016
 
 
  
