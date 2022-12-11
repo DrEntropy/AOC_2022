@@ -108,9 +108,7 @@ for(round in 1:num_rounds){
 prod(tail(sort(monkey_inspections),2))
 ```
 
-```{r}
-prod(tail(sort(monkey_inspections),2))
-```
+ 
 
 
  
