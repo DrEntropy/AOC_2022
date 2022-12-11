@@ -15,14 +15,17 @@ raw_data <-  read_file('data/day11_input.txt')
 I assume there is a much better way!
 
 ```{r}
-monkey_num <- as.numeric(str_match_all(raw_data,"Monkey (\\d+)")[[1]][,2])
-operation  <- str_match_all(raw_data,"Operation: new = old (.)")[[1]][,2]
-operand    <- str_match_all(raw_data,"Operation: new = old . (.+)")[[1]][,2]
-test_divisor <- as.numeric(str_match_all(raw_data,"Test: divisible by (\\d+)")[[1]][,2])
-true_target <- as.numeric(str_match_all(raw_data,"If true: throw to monkey (\\d+)")[[1]][,2])
-false_target <- as.numeric(str_match_all(raw_data,"If false: throw to monkey (\\d+)")[[1]][,2])
-items <- str_match_all(raw_data,"Starting items: ((\\d+, )*(\\d+))") [[1]][,2]
-items <- map(items, \(x){as.numeric(str_split(x,", ")[[1]])})
+setup <- \(){
+  monkey_num <<- as.numeric(str_match_all(raw_data,"Monkey (\\d+)")[[1]][,2])
+  operation  <<- str_match_all(raw_data,"Operation: new = old (.)")[[1]][,2]
+  operand    <<- str_match_all(raw_data,"Operation: new = old . (.+)")[[1]][,2]
+  test_divisor <<- as.numeric(str_match_all(raw_data,"Test: divisible by (\\d+)")[[1]][,2])
+  true_target <<- as.numeric(str_match_all(raw_data,"If true: throw to monkey (\\d+)")[[1]][,2])
+  false_target <<- as.numeric(str_match_all(raw_data,"If false: throw to monkey (\\d+)")[[1]][,2])
+  items <<- str_match_all(raw_data,"Starting items: ((\\d+, )*(\\d+))") [[1]][,2]
+  items <<- map(items, \(x){as.numeric(str_split(x,", ")[[1]])})
+}
+
 ```
 
 
@@ -47,6 +50,7 @@ inspect_item <- \(monkey, item){
 * Assumes (as in my data) that monkeys never throw to themselves
 
 ```{r}
+setup()
 num_rounds = 20
 monkey_inspections <- rep(0,length(monkey_num))
 for(round in 1:num_rounds){
@@ -67,12 +71,10 @@ for(round in 1:num_rounds){
     }
   }
 }
-    
+prod(tail(sort(monkey_inspections),2))    
 ```
 
-```{r}
-prod(tail(sort(monkey_inspections),2))
-```
+ 
 113232
 
 
@@ -81,6 +83,7 @@ prod(tail(sort(monkey_inspections),2))
 NOTE : Need to set up to reload data arrays
 
 ```{r}
+setup()
 num_rounds = 10000
 reducer = prod(test_divisor)
 monkey_inspections <- rep(0,length(monkey_num))
@@ -102,7 +105,7 @@ for(round in 1:num_rounds){
     }
   }
 }
-
+prod(tail(sort(monkey_inspections),2))
 ```
 
 ```{r}
