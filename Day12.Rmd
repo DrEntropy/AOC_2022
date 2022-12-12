@@ -33,11 +33,11 @@ end <- which(data_matrix == 'E', arr.ind= TRUE)
 height_matrix <- data_matrix
 height_matrix[start] <- 'a'
 height_matrix[end] <- 'z'
-height_matrix  <- matrix(height_matrix |> map_dbl(\(x){as.numeric(which(letters==x))}),
+height_matrix  <- matrix(height_matrix |> map_dbl(\(x){as.numeric(which(letters == x))}),
                           nrow = nrow(data_matrix), ncol = ncol(data_matrix))
 ```
  
-Ok now start the wave
+ 
 
 ```{r}
 find_distance <- \(start_point) {
@@ -45,24 +45,18 @@ find_distance <- \(start_point) {
       visited <- matrix(FALSE, nrow = nrow(height_matrix), ncol = ncol(height_matrix))
       distances <- matrix(Inf, nrow = nrow(height_matrix), ncol = ncol(height_matrix))
       distances[current] <- 0
+      update_distance <- \(dest) {
+        if(all(dest <= dim(distances) & dest > c(0,0))  && 
+               height_matrix[dest] <= height_matrix[current] + 1)
+          distances[dest] <<- min(distances[dest],distances[current]+1)
+      }
       while(any(current != end)){
           visited[current] = TRUE
-          east <- current + c(0,1)
-          west <- current - c(0,1)
-          north <- current + c(1,0)
-          south <- current - c(1,0)
-          if(all(east <= dim(distances)) && height_matrix[east] <= height_matrix[current] +1 ){
-            distances[east] <- min(distances[east],distances[current]+1)
-          }
-          if(all(west > c(0,0)) && height_matrix[west] <= height_matrix[current] +1 ){
-            distances[west] <- min(distances[west],distances[current]+1)
-          }
-          if(all(north <= dim(distances)) && height_matrix[north] <= height_matrix[current] +1 ){
-            distances[north] <- min(distances[north],distances[current]+1)
-          }
-          if(all(south > c(0,0)) && height_matrix[south] <= height_matrix[current] +1 ){
-            distances[south] <- min(distances[south],distances[current]+1)
-          }
+          update_distance(current + c(0,1))
+          update_distance(current - c(0,1))
+          update_distance(current + c(1,0))
+          update_distance(current - c(1,0))
+ 
           temp <- distances
           temp[visited] <- Inf
           current <- which(temp == min(temp), arr.ind= TRUE)[1,,drop=FALSE]  # wow really R?
@@ -81,6 +75,8 @@ find_distance(start)
 330
 
 ## Part 2
+
+Find distance from closest starting point with height == 1
 
 ```{r}
 start_options = which(height_matrix == 1, arr.ind = TRUE)
