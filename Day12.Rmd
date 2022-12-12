@@ -1,0 +1,39 @@
+ 
+## Import and process data
+ 
+
+```{r}
+library(tidyverse)
+``` 
+
+```{r}
+raw_data <-  read_lines('data/day12_test_input.txt')
+data_matrix <-  str_split(raw_data,"",simplify=TRUE) |>
+           matrix(nrow = length(raw_data))
+```
+
+
+##Notes from the problem statement
+
+a is the lowest elevation, b is the next-lowest, and so on up to the highest elevation, z.
+
+Also included on the heightmap are marks for your current position (S) and the location that should get the best signal (E). Your current position (S) has elevation a, and the location that should get the best signal (E) has elevation z.
+During each step, you can move exactly one square up, down, left, or right. To avoid needing to get out your climbing gear, the elevation of the destination square can be at most one higher than the elevation of your current square
+
+## Path finding
+
+The way to path find is this: https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm 
+
+My plan is to keep a matrix of elevations, one of booleans (visited == TRUE) and one with distnances. 
+
+```{r}
+start <- which(data_matrix == 'S', arr.ind= TRUE)
+end <- which(data_matrix == 'E', arr.ind= TRUE)
+
+height_matrix <- data_matrix
+height_matrix[start] <- 'a'
+height_matrix[end] <- 'z'
+height_matrix[] <- height_matrix |> map_dbl(\(x){which(letters==x)})
+height_matrix
+```
+ 
